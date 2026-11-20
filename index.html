@@ -1,0 +1,207 @@
+<!doctype html>
+<html lang="bn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0b1022">
+<title>VIRAL VIDEO HUB</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+:root{--bg:#0b1022;--panel:#151d39;--muted:#aab4d3;--text:#f7f8ff;--a:#7c5cff;--b:#12d6c5}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 10% 0,#25245a 0,transparent 35%),var(--bg);color:var(--text);font:15px system-ui,Arial,sans-serif}
+.wrap{max-width:760px;margin:auto;padding:18px 15px 50px}.top{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 0 20px}
+.brand{font-weight:900;letter-spacing:1px;font-size:19px}.brand span{color:#a995ff}.pill{border:1px solid #ffffff20;background:#ffffff0c;color:var(--muted);padding:8px 11px;border-radius:99px}
+.hero{padding:23px;border-radius:25px;background:linear-gradient(120deg,#5637d9,#087f9a);box-shadow:0 18px 45px #0005;position:relative;overflow:hidden}
+.hero:after{content:"▶";position:absolute;right:20px;bottom:-28px;font-size:130px;opacity:.12}.hero h1{font-size:28px;line-height:1.1;margin:12px 0 9px}.hero p{color:#e4eaff;margin:0}
+.ad{margin:18px 0;padding:13px;border:1px dashed #7c8ab8;border-radius:17px;text-align:center;background:#ffffff08;color:var(--muted);min-height:74px}
+.section{display:flex;justify-content:space-between;align-items:center;margin:24px 2px 13px}.section h2{font-size:19px;margin:0}.muted{color:var(--muted)}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px}
+.card{background:linear-gradient(160deg,#1b2548,#121a33);border:1px solid #ffffff12;border-radius:20px;overflow:hidden;box-shadow:0 12px 30px #0003;animation:rise .45s ease both}
+@keyframes rise{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+.thumb{width:100%;aspect-ratio:16/9;object-fit:cover;background:#27345c;display:block}.cardbody{padding:14px}.card h3{margin:0 0 13px;font-size:16px;line-height:1.4}
+button{border:0;border-radius:13px;padding:12px 16px;font-weight:800;color:white;background:linear-gradient(110deg,var(--a),#4b9bff);cursor:pointer}
+button:disabled{opacity:.55;cursor:not-allowed}.watch{width:100%}.ghost{background:#ffffff12;border:1px solid #ffffff20}
+.empty,.error{padding:25px;text-align:center;color:var(--muted);border:1px solid #ffffff16;border-radius:18px}
+.overlay{position:fixed;inset:0;background:#050817ef;display:none;align-items:center;justify-content:center;padding:18px;z-index:10}
+.modal{width:min(100%,560px);max-height:90vh;overflow:auto;background:#151e3b;border:1px solid #ffffff20;border-radius:22px;padding:20px;box-shadow:0 20px 80px #0009}
+.modal h2{margin:0 0 8px}.modal p{color:var(--muted);line-height:1.5}
+.video{width:100%;max-height:65vh;background:#000;border-radius:14px}.close{float:right;background:#ffffff15;padding:7px 11px}
+.loader{position:fixed;inset:0;z-index:20;background:#0b1022;display:grid;place-items:center;transition:opacity .35s}
+.loader.hide{opacity:0;pointer-events:none}.spinner{width:48px;height:48px;border:4px solid #ffffff25;border-top-color:#9a85ff;border-radius:50%;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}footer{text-align:center;color:#7885aa;font-size:12px;margin-top:32px}
+.adstep{padding:15px;border:1px dashed #8c9bc9;border-radius:15px;margin:12px 0;background:#ffffff08}
+.adstep strong{display:block;margin-bottom:6px;color:#fff}.adstep small{color:var(--muted)}
+</style>
+</head>
+<body>
+<div class="loader" id="loader"><div style="text-align:center"><div class="spinner"></div><p>VIRAL VIDEO HUB লোড হচ্ছে…</p></div></div>
+<main class="wrap">
+<header class="top"><div class="brand">🎬 VIRAL <span>VIDEO HUB</span></div><div class="pill" id="langLabel">🌐 বাংলা</div></header>
+<section class="hero"><div class="pill" style="display:inline-block;color:white">🔥 TRENDING VIDEOS</div><h1 id="heroTitle">ভাইরাল ভিডিও খুঁজে নাও</h1><p id="heroText">নতুন ও জনপ্রিয় ভিডিও এক জায়গায়।</p></section>
+<div class="ad" id="topBannerAd"><b>Advertisement</b><div style="font-size:12px;margin-top:5px">প্রথম ব্যানার বিজ্ঞাপনের জায়গা</div></div>
+<div class="section"><h2 id="postsTitle">✨ নতুন পোস্ট</h2><span class="muted" id="count">—</span></div>
+<div id="posts" class="grid"><div class="empty">পোস্ট লোড হচ্ছে…</div></div>
+<div class="ad" id="bottomBannerAd"><b>Advertisement</b><div style="font-size:12px;margin-top:5px">দ্বিতীয় ব্যানার বিজ্ঞাপনের জায়গা</div></div>
+<footer>VIRAL VIDEO HUB · Watch responsibly</footer>
+</main>
+
+<div class="overlay" id="unlockModal"><div class="modal">
+<button class="close" onclick="closeUnlock()">✕</button>
+<h2 id="unlockTitle">🔓 ভিডিও আনলক</h2>
+<p id="unlockDesc">ভিডিও দেখতে ২টি Rewarded Ad সম্পন্ন করতে হবে।</p>
+<div class="adstep"><strong id="adOneTitle">বিজ্ঞাপন ১</strong><small id="adOneStatus">এখনো সম্পন্ন হয়নি</small></div>
+<div class="adstep"><strong id="adTwoTitle">বিজ্ঞাপন ২</strong><small id="adTwoStatus">এখনো সম্পন্ন হয়নি</small></div>
+<button id="continueBtn" class="watch">▶ বিজ্ঞাপন দেখুন</button>
+<p id="adNote" style="font-size:12px">Rewarded ad provider সংযুক্ত না থাকলে ভিডিও আনলক হবে না।</p>
+</div></div>
+
+<div class="overlay" id="videoModal"><div class="modal">
+<button class="close" onclick="closeVideo()">✕</button><h2 id="videoTitle">ভিডিও</h2><div id="playerHost"></div>
+</div></div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
+import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-database.js";
+
+/* Firebase config supplied by the user. Firebase web apiKey is a public identifier.
+   Protect data with Realtime Database Rules; never put service-account credentials here. */
+const firebaseConfig = {
+  apiKey: "AIzaSyCRc08P690u4R9ctgOKbdYi0EWdtRMAW_4",
+  authDomain: "growtaskbdbot.firebaseapp.com",
+  databaseURL: "https://growtaskbdbot-default-rtdb.firebaseio.com",
+  projectId: "growtaskbdbot",
+  storageBucket: "growtaskbdbot.firebasestorage.app",
+  messagingSenderId: "529191101847",
+  appId: "1:191191101847:web:a4f10e6ae3577171dc90d2",
+  measurementId: "G-5E2GQSWJMT"
+};
+// IMPORTANT: appId must match the Firebase Console exactly.
+// The correct appId from the config supplied in chat is set below:
+firebaseConfig.appId = "1:529191101847:web:a4f10e6ae3577171dc90d2";
+
+const app = initializeApp(firebaseConfig);
+const database = getDatabase(app);
+const tg = window.Telegram?.WebApp;
+if (tg) { tg.ready(); tg.expand(); }
+
+const lang = (navigator.language || "bn").toLowerCase().startsWith("bn") ? "bn" : "en";
+const words = {
+ bn:{hero:"ভাইরাল ভিডিও খুঁজে নাও",sub:"নতুন ও জনপ্রিয় ভিডিও এক জায়গায়।",posts:"✨ নতুন পোস্ট",watch:"▶ এখনই দেখুন",unlock:"🔓 ভিডিও আনলক",desc:"ভিডিও দেখতে পরপর ২টি Rewarded Ad সম্পন্ন করুন।",go:"▶ Rewarded Ad দেখুন",empty:"এখনো কোনো পোস্ট নেই। পরে আবার দেখুন।",failed:"পোস্ট লোড হয়নি। Firebase সেটআপ পরীক্ষা করুন।",admissing:"Rewarded Ad সিস্টেম এখনো সংযুক্ত করা হয়নি। অ্যাড নেটওয়ার্কের আসল Rewarded Ad callback যুক্ত করতে হবে।",adcomplete:"বিজ্ঞাপন সম্পন্ন হয়েছে",adpending:"এখনো সম্পন্ন হয়নি",need:"আরও একটি বিজ্ঞাপন বাকি।",ready:"দুটি বিজ্ঞাপন সম্পন্ন! ভিডিও চালু হচ্ছে…",note:"বিজ্ঞাপন provider সংযুক্ত না থাকলে কোনো বিজ্ঞাপন সম্পন্ন বলে গণ্য হবে না।"},
+ en:{hero:"Discover What's Viral",sub:"Fresh videos, all in one place.",posts:"✨ Latest Posts",watch:"▶ WATCH NOW",unlock:"🔓 Unlock video",desc:"Complete 2 rewarded ads to watch this video.",go:"▶ Watch rewarded ad",empty:"No posts yet. Please check back soon.",failed:"Could not load posts. Check Firebase setup.",admissing:"Rewarded ad provider is not connected yet. Add the ad network's genuine rewarded-ad callback.",adcomplete:"Ad completed",adpending:"Not completed yet",need:"One more ad is required.",ready:"Both ads completed. Opening video…",note:"An ad only counts after the provider confirms genuine completion."}
+};
+const t=words[lang];
+document.documentElement.lang=lang;
+document.getElementById("langLabel").textContent=lang==="bn"?"🌐 বাংলা":"🌐 English";
+document.getElementById("heroTitle").textContent=t.hero;
+document.getElementById("heroText").textContent=t.sub;
+document.getElementById("postsTitle").textContent=t.posts;
+document.getElementById("unlockTitle").textContent=t.unlock;
+document.getElementById("unlockDesc").textContent=t.desc;
+document.getElementById("continueBtn").textContent=t.go;
+document.getElementById("adNote").textContent=t.note;
+
+let selectedPost = null;
+let completedAds = 0;
+let unsubscribePosts = null;
+
+function esc(value) {
+ return String(value ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+}
+function showError(message) {
+ document.getElementById("posts").innerHTML = '<div class="error">'+esc(message)+'</div>';
+}
+function renderPosts(posts) {
+ const host = document.getElementById("posts");
+ const items = Object.entries(posts || {}).map(([id,p]) => ({id,...p}))
+   .filter(p => p && p.title && p.videoUrl)
+   .sort((a,b) => (b.createdAt || 0) - (a.createdAt || 0));
+ document.getElementById("count").textContent = items.length;
+ if (!items.length) { host.innerHTML = '<div class="empty">'+esc(t.empty)+'</div>'; return; }
+ host.innerHTML = items.map(p => `<article class="card">
+   <img class="thumb" src="${esc(p.bannerUrl || "")}" alt="" loading="lazy" onerror="this.style.display='none'">
+   <div class="cardbody"><h3>${esc(p.title)}</h3><button class="watch" data-id="${esc(p.id)}">${esc(t.watch)}</button></div>
+ </article>`).join("");
+ host.querySelectorAll("button[data-id]").forEach(button => button.addEventListener("click", () => {
+   selectedPost = items.find(p => p.id === button.dataset.id);
+   openUnlock();
+ }));
+}
+function loadPosts() {
+ const postsRef = ref(database, "posts");
+ unsubscribePosts = onValue(postsRef, snapshot => renderPosts(snapshot.val()), error => {
+   console.error(error); showError(t.failed);
+ });
+}
+function openUnlock() {
+ completedAds = 0;
+ updateAdStatus();
+ document.getElementById("unlockModal").style.display = "flex";
+}
+function closeUnlock() { document.getElementById("unlockModal").style.display = "none"; }
+function updateAdStatus() {
+ document.getElementById("adOneStatus").textContent = completedAds >= 1 ? t.adcomplete : t.adpending;
+ document.getElementById("adTwoStatus").textContent = completedAds >= 2 ? t.adcomplete : t.adpending;
+ document.getElementById("continueBtn").textContent = completedAds >= 2 ? t.ready : t.go;
+}
+function openVideo() {
+ if (!selectedPost) return;
+ closeUnlock();
+ document.getElementById("videoTitle").textContent = selectedPost.title || "Video";
+ const host = document.getElementById("playerHost");
+ host.innerHTML = "";
+ const url = selectedPost.videoUrl || "";
+ if (/\.(mp4|webm|ogg)(\?|#|$)/i.test(url)) {
+   const video = document.createElement("video");
+   video.className = "video"; video.controls = true; video.playsInline = true; video.src = url;
+   host.appendChild(video);
+ } else {
+   const frame = document.createElement("iframe");
+   frame.className = "video"; frame.style.height = "315px"; frame.src = url;
+   frame.allow = "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen";
+   frame.allowFullscreen = true; frame.referrerPolicy = "strict-origin-when-cross-origin";
+   host.appendChild(frame);
+ }
+ document.getElementById("videoModal").style.display = "flex";
+}
+function closeVideo() {
+ document.getElementById("videoModal").style.display = "none";
+ document.getElementById("playerHost").innerHTML = "";
+}
+window.closeUnlock = closeUnlock;
+window.closeVideo = closeVideo;
+
+/* AD NETWORK ADAPTER:
+   Your provider's documented rewarded-ad script must define:
+   window.showRewardedAd = async function () { ... return true only after provider confirms completion ... }
+   Do not return true just because the user clicked a button. */
+document.getElementById("continueBtn").addEventListener("click", async () => {
+ if (completedAds >= 2) { openVideo(); return; }
+ const button = document.getElementById("continueBtn");
+ if (typeof window.showRewardedAd !== "function") {
+   alert(t.admissing);
+   return;
+ }
+ button.disabled = true;
+ try {
+   const rewarded = await window.showRewardedAd();
+   if (rewarded === true) {
+     completedAds += 1;
+     updateAdStatus();
+     if (completedAds >= 2) openVideo();
+     else alert(t.need);
+   } else {
+     alert(t.adpending);
+   }
+ } catch (error) {
+   console.error(error);
+   alert(t.adpending);
+ } finally {
+   button.disabled = false;
+ }
+});
+
+loadPosts();
+setTimeout(() => document.getElementById("loader").classList.add("hide"), 500);
+</script>
+</body>
+</html>
